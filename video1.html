@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel  = "stylesheet">
+    <!--<script src="https://cdn.tailwindcss.com"></script>-->
+</head>
+
+<body>
+    <div x-data="game()" class = "px-10 flex item-center justify-center min-h-screen">
+        <h1 class = "fixed top-0 right-0 p-10 font-bold text-3xl">
+            <span x-text="points"></span>
+            <span class="text-xs"> pts</span>
+        </h1>
+        <div class="flex-1 grid grid-cols-4 gap-10"> 
+            <template x-for = "card in cards"> 
+                <div>
+                    <button x-show="! card.cleared"
+                            :style="'background: ' + (card.flipped? card.color:'#999')" 
+                            class = "w-full h-32"   
+                            @click="flipCard(card)">
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
+    
+    <!-- flash message-->
+    <div x-data=" {show:false, message: 'Default'}"
+        x-show.transition.opacity = "show" 
+        x-text = "message"
+        @flash.window="
+            message = $event.detail.message; 
+            show = true;
+            setTimeout(()=>show = false, 1000)
+            "
+         class="fixed bottom-0 right-0 bg-green-500 text-white p-2 mb-4 mr-4 rounded"
+    >
+    </div>
+
+    <script>
+        function pause(milliseconds= 1000){
+            return new Promise(resolve => setTimeout(resolve,milliseconds));
+        }
+        function flash(message){
+            window.dispatchEvent(new CustomEvent('flash',{
+                detail:{message}
+            }));
+        }
+        function game(){
+            return{
+                cards:[ 
+                    {id: 1, color: 'green', flipped: false, cleared: false },
+                    {id: 2, color: 'red', flipped: false, cleared: false },
+                    {id: 3, color: 'blue', flipped: false, cleared: false },
+                    {id: 4, color: 'yellow', flipped: false, cleared: false },
+                    {id: 5, color: 'green', flipped: false, cleared: false },
+                    {id: 6, color: 'red', flipped: false, cleared: false },
+                    {id: 7, color: 'blue', flipped: false, cleared: false },
+                    {id: 8, color: 'yellow', flipped: false, cleared: false },
+                ],
+                get flippedCards(){
+                     return this.cards.filter(card =>card.flipped);
+                },
+                get clearedCards(){
+                     return this.cards.filter(card =>card.cleared);
+                },
+                get reaminingCards(){
+                     return this.cards.filter(card =>!card.cleared);
+                },
+                get points(){
+                    return this.clearedCards.length;
+                },
+                async flipCard(card){
+                    console.log(card);
+                    if(this.flippedCards.length === 2){
+                        return;
+                    }
+                    card.flipped = !card.flipped;
+                    if(this.flippedCards.length === 2){
+                        
+                        if(this.hasMatch()){
+                            flash("You found a match!");
+                            await pause();
+
+                            this.flippedCards.forEach(card=>card.cleared = true);
+
+                            if(!this.reaminingCards.length){
+                               alert('You won!');
+                            }
+
+                        }
+
+                        await pause();
+                        this.flippedCards.forEach(card=>card.flipped = false);
+                    }
+                },
+                hasMatch(){ 
+                    return this.flippedCards[0]['color'] ===this.flippedCards[1]['color'];
+                }
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>

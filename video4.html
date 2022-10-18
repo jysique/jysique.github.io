@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        .active{color: blue;}
+    </style>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel  = "stylesheet">
+    <!--<script src="https://cdn.tailwindcss.com"></script>-->
+</head>
+
+<body class = "p-10 max-w-lg mx-auto">
+    <form x-data="menu()"
+            @submit.preve nt= "submit"
+    >
+        <div class = "mb-6">
+            <label class = "block mb-2 upppercase font-blod text-xs text-gray-700"
+                for="name">
+                Name
+            </label>
+            <input class = "border border-gray-400 p-2 w-full" 
+                    type = "text"
+                    name = "name"
+                    id= "name"
+                    x-model="form.name"
+                    required
+            >
+
+            <!-- x-model="name"-->
+            <p x-text="form.name"></p>
+            <p x-text="form.age"></p>
+
+            <template x-if="user"> <!--x-if check if the object exists-->
+                <div x-text="'User' + user.name + 'was created' + user.createdAt"></div>
+            </template>
+
+        </div>
+    </form>
+    <script>
+        function menu(){
+            return{
+                user:null,
+                form: {
+                    name:" ",
+                    age: 0,
+                    country:""
+                },
+                submit(){
+                    console.log(this.form);
+                    fetch('https://reqres.in/api/users',{
+                        method:'POST',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify(this.form),
+
+                    })
+                    .then(response=>response.json())
+                    .then(user=>this.user= user)
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
